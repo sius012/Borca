@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "140229943373",
+    "project_id": "borca-b5320",
+    "storage_bucket": "borca-b5320.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:140229943373:android:4a7c6cd535e084e6fdfc04",
+        "android_client_info": {
+          "package_name": "com.seeus.borca"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "140229943373-8ni8o4gehec39n1hlsio1tehppe5eg7e.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDNLG6ulBYMWWB1ADqEYbl9iT85TaAcLd8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "140229943373-8ni8o4gehec39n1hlsio1tehppe5eg7e.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
