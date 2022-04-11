@@ -1,34 +1,42 @@
 {
   "project_info": {
-    "project_number": "140229943373",
-    "project_id": "borca-b5320",
-    "storage_bucket": "borca-b5320.appspot.com"
+    "project_number": "140425570095",
+    "firebase_url": "https://borca-87891-default-rtdb.firebaseio.com",
+    "project_id": "borca-87891",
+    "storage_bucket": "borca-87891.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:140229943373:android:4a7c6cd535e084e6fdfc04",
+        "mobilesdk_app_id": "1:140425570095:android:36cd1c251d7391a28723da",
         "android_client_info": {
           "package_name": "com.seeus.borca"
         }
       },
       "oauth_client": [
         {
-          "client_id": "140229943373-8ni8o4gehec39n1hlsio1tehppe5eg7e.apps.googleusercontent.com",
+          "client_id": "140425570095-jd6a90420k3tl4d7miqmjavcv71dkbs0.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyDNLG6ulBYMWWB1ADqEYbl9iT85TaAcLd8"
+          "current_key": "AIzaSyB2vgDScsLSw92Dc00TnjLCUAblsQocuM4"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "140229943373-8ni8o4gehec39n1hlsio1tehppe5eg7e.apps.googleusercontent.com",
+              "client_id": "140425570095-jd6a90420k3tl4d7miqmjavcv71dkbs0.apps.googleusercontent.com",
               "client_type": 3
+            },
+            {
+              "client_id": "140425570095-eeqc3tmod1d737101gsoarv8d2j6hj6f.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.borca.seeus"
+              }
             }
           ]
         }

@@ -1,10 +1,9 @@
-//@dart=2.9
-
-import 'dart:js';
-
+import 'package:borca2/auth_service.dart';
+import 'package:borca2/register.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_login/flutter_login.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
 
 import 'app_screen.dart';
@@ -19,35 +18,16 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  Duration get loginTime => Duration(microseconds: 2250);
+  late TextEditingController email;
+  late TextEditingController password;
 
-  Future<String> _authUserSignUp(LoginData data) {
-    print("Name: ${data.name}, Password: ${data}");
-    // return Future.delayed(loginTime).then((_) {
-    //   // if (!users.containsKey(data.name)) {
-    //   //   return "Username Tidak Tersedia";
-    //   // }
-    //   // if (users[data.name] != data.password) {
-    //   //   return 'Password salah';
-    //   // }
-    //   // return "s";
+  final _authClient = AuthService();
 
-    //   Provider.of<Auth>(context, listen: false).isSignup(data);
-    //   return null;
-    // });
-  }
-
-  Future<String> _authUser(LoginData data) {
-    print("Name: ${data.name}, Password: ${data}");
-    return Future.delayed(loginTime).then((_) {
-      if (!users.containsKey(data.name)) {
-        return "Username Tidak Tersedia";
-      }
-      if (users[data.name] != data.password) {
-        return 'Password salah';
-      }
-      return null;
-    });
+  @override
+  void initState() {
+    super.initState();
+    email = TextEditingController();
+    password = TextEditingController();
   }
 
   @override
@@ -92,6 +72,7 @@ class _LoginPageState extends State<LoginPage> {
                     new Padding(
                       padding: new EdgeInsets.symmetric(horizontal: 50),
                       child: new TextField(
+                        controller: email,
                         decoration: new InputDecoration(
                             contentPadding: new EdgeInsets.all(10.0),
                             hintText: "Masukan Email",
@@ -103,6 +84,7 @@ class _LoginPageState extends State<LoginPage> {
                     new Padding(
                       padding: new EdgeInsets.symmetric(horizontal: 50),
                       child: new TextField(
+                        controller: password,
                         obscureText: true,
                         decoration: new InputDecoration(
                             contentPadding: new EdgeInsets.all(10.0),
@@ -126,13 +108,23 @@ class _LoginPageState extends State<LoginPage> {
                                           borderRadius:
                                               BorderRadius.circular(20)),
                                       color: Colors.blue,
-                                      onPressed: () => Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                              builder: (context) =>
-                                                  const AppScreen())),
+                                      onPressed: () async {
+                                        final User? user =
+                                            await _authClient.loginUser(
+                                                email: email.text,
+                                                password: password.text);
+
+                                        if (user != null) {
+                                          Navigator.of(context)
+                                              .pushAndRemoveUntil(
+                                                  MaterialPageRoute(
+                                                      builder: (contex) =>
+                                                          AppScreen()),
+                                                  (route) => false);
+                                        }
+                                      },
                                       child: new Text(
-                                        "Sign Up",
+                                        "Sign In",
                                         style: TextStyle(color: Colors.white),
                                       )),
                                 )),
@@ -144,9 +136,15 @@ class _LoginPageState extends State<LoginPage> {
                       children: [
                         new Text("sudah bergabung?"),
                         new GestureDetector(
-                          onTap: (() {}),
+                          onTap: (() {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) =>
+                                        const RegisterPage()));
+                          }),
                           child: new Text(
-                            "Sign in",
+                            "Sign Up",
                             style: TextStyle(
                                 color: Colors.blue,
                                 fontWeight: FontWeight.bold),

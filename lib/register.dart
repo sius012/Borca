@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
 import 'app_screen.dart';
+import 'auth_service.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({Key? key}) : super(key: key);
@@ -11,6 +13,19 @@ class RegisterPage extends StatefulWidget {
 }
 
 class _RegisterPageState extends State<RegisterPage> {
+  late TextEditingController nama;
+  late TextEditingController email;
+  late TextEditingController password;
+
+  @override
+  void initState() {
+    super.initState();
+    nama = TextEditingController();
+    email = TextEditingController();
+    password = TextEditingController();
+  }
+
+  final _authClient = AuthService();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -52,6 +67,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     new Padding(
                       padding: new EdgeInsets.symmetric(horizontal: 50),
                       child: new TextField(
+                        controller: nama,
                         decoration: new InputDecoration(
                             contentPadding: new EdgeInsets.all(10.0),
                             hintText: "Masukan Nama",
@@ -63,6 +79,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     new Padding(
                       padding: new EdgeInsets.symmetric(horizontal: 50),
                       child: new TextField(
+                        controller: email,
                         decoration: new InputDecoration(
                             contentPadding: new EdgeInsets.all(10.0),
                             hintText: "Masukan Email",
@@ -74,6 +91,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     new Padding(
                       padding: new EdgeInsets.symmetric(horizontal: 50),
                       child: new TextField(
+                        controller: password,
                         obscureText: true,
                         decoration: new InputDecoration(
                             contentPadding: new EdgeInsets.all(10.0),
@@ -97,11 +115,22 @@ class _RegisterPageState extends State<RegisterPage> {
                                           borderRadius:
                                               BorderRadius.circular(20)),
                                       color: Colors.blue,
-                                      onPressed: () => Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                              builder: (context) =>
-                                                  const AppScreen())),
+                                      onPressed: () async {
+                                        final User? user =
+                                            await _authClient.registerUser(
+                                                name: nama.text,
+                                                email: email.text,
+                                                password: password.text);
+
+                                        if (user != null) {
+                                          Navigator.of(context)
+                                              .pushAndRemoveUntil(
+                                                  MaterialPageRoute(
+                                                      builder: (contex) =>
+                                                          AppScreen()),
+                                                  (route) => false);
+                                        }
+                                      },
                                       child: new Text(
                                         "Sign Up",
                                         style: TextStyle(color: Colors.white),

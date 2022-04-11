@@ -7,7 +7,7 @@ import 'package:http/http.dart' as http;
 class Auth with ChangeNotifier {
   signUp(String email, String pass) async {
     Uri url = Uri.parse(
-        "https://identitytoolkit.googleapis.com/v1/accounts:signInWithCustomToken?key=[API_KEY]");
+        "https://identitytoolkit.googleapis.com/v1/accounts:signInWithCustomToken?key=[]");
 
     var response = await http.post(url,
         body: json.encode(
