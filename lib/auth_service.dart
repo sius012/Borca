@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:borca2/login.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -5,8 +7,26 @@ import 'package:firebase_core/firebase_core.dart';
 
 class AuthService {
   FirebaseAuth auth = FirebaseAuth.instance;
+  FirebaseFirestore dataDetail = FirebaseFirestore.instance;
 
   User? user;
+  Users? getUser;
+
+  changedata(data) {
+    getUser = data;
+  }
+
+  getDetail(id_user) async {
+    var userdata = await dataDetail
+        .collection('users_detail')
+        .where("id_user", isEqualTo: id_user)
+        .snapshots()
+        .map((event) => changedata(Users.fromJson(event.docs.first.data())));
+
+    var data = userdata.first;
+    print("thedata :$data");
+    var arr = [];
+  }
 
   registerUser(
       {required String name,
@@ -17,15 +37,15 @@ class AuthService {
           .createUserWithEmailAndPassword(email: email, password: password);
 
       user = userCredential.user;
-      await user!.updateDisplayName(name);
       user = auth.currentUser;
       if (userCredential != null) {
         final docUser = FirebaseFirestore.instance
             .collection('users_detail')
             .doc(user!.uid);
 
-        final dU = Users(
-            id_user: user!.uid, id: '', level: "sesepuh", username: "garox");
+        getDetail(user!.uid);
+        final dU =
+            Users(id_user: user!.uid, id: '', level: "sesepuh", username: name);
 
         final json = dU.toJson();
 
@@ -34,6 +54,8 @@ class AuthService {
     } catch (e) {
       print(e.toString());
     }
+
+    return [user, getUser];
   }
 
   loginUser({required String email, required String password}) async {
@@ -47,11 +69,11 @@ class AuthService {
     }
   }
 
-  logoutUser() {}
+  logoutUser() async {}
 }
 
 class Users {
-  String id;
+  final String id;
   final String id_user;
   final String username;
   final String level;
@@ -69,4 +91,9 @@ class Users {
         'username': username,
         'level': level,
       };
+
+  static Users fromJson(Map<String, dynamic> json) => Users(
+      username: json['username'],
+      level: json['level'],
+      id_user: json['id_user']);
 }

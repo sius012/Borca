@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
 import 'app_screen.dart';
 import 'auth_service.dart';
+import 'dart:convert';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({Key? key}) : super(key: key);
@@ -116,7 +117,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                               BorderRadius.circular(20)),
                                       color: Colors.blue,
                                       onPressed: () async {
-                                        final User? user =
+                                        final user =
                                             await _authClient.registerUser(
                                                 name: nama.text,
                                                 email: email.text,
@@ -126,8 +127,12 @@ class _RegisterPageState extends State<RegisterPage> {
                                           Navigator.of(context)
                                               .pushAndRemoveUntil(
                                                   MaterialPageRoute(
-                                                      builder: (contex) =>
-                                                          AppScreen()),
+                                                    builder: (contex) =>
+                                                        AppScreen(
+                                                            user: user[0],
+                                                            detailuser:
+                                                                user[1]),
+                                                  ),
                                                   (route) => false);
                                         }
                                       },

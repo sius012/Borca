@@ -1,10 +1,15 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'post.dart';
 import 'profile.dart';
+import 'auth_service.dart';
 
 class AppScreen extends StatefulWidget {
-  const AppScreen({Key? key}) : super(key: key);
+  final User user;
+  final Users detailuser;
+  const AppScreen({Key? key, required this.user, required this.detailuser})
+      : super(key: key);
 
   @override
   _AppScreenState createState() => _AppScreenState();
@@ -49,27 +54,7 @@ class _AppScreenState extends State<AppScreen> {
         backgroundColor: Color.fromARGB(255, 255, 255, 255),
         body: SafeArea(
           child: new ListView(
-            children: <Widget>[
-              new Padding(padding: new EdgeInsets.all(10)),
-              new Container(
-                height: MediaQuery.of(context).size.height,
-                width: MediaQuery.of(context).size.width,
-                child: new Column(
-                  children: [
-                    new ListView(
-                      children: [new Text("s")],
-                    )
-                  ],
-                ),
-              ),
-              new Postingan(
-                namaPemosting: "bambang_wisanggeni",
-                status: "sesepuh",
-                lokasi: "Haluan kanan Seberang jalan",
-                text: "Halo Saya baru saya memposting postingan saya",
-                tipeText: "quotes",
-              ),
-            ],
+            children: <Widget>[new Text(widget.detailuser.username)],
           ),
         ));
   }

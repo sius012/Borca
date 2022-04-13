@@ -109,7 +109,7 @@ class _LoginPageState extends State<LoginPage> {
                                               BorderRadius.circular(20)),
                                       color: Colors.blue,
                                       onPressed: () async {
-                                        final User? user =
+                                        final user =
                                             await _authClient.loginUser(
                                                 email: email.text,
                                                 password: password.text);
@@ -119,7 +119,10 @@ class _LoginPageState extends State<LoginPage> {
                                               .pushAndRemoveUntil(
                                                   MaterialPageRoute(
                                                       builder: (contex) =>
-                                                          AppScreen()),
+                                                          AppScreen(
+                                                            user: user[0],
+                                                            detailuser: user[1],
+                                                          )),
                                                   (route) => false);
                                         }
                                       },
