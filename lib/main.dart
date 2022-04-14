@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'app_screen.dart';
 import 'login.dart';
+import 'add_post.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -33,7 +34,7 @@ class MyApp extends StatelessWidget {
       ],
       builder: (context, child) => MaterialApp(
         debugShowCheckedModeBanner: false,
-        home: LoginPage(),
+        home: AddPostPage(),
       ),
     );
   }
