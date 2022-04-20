@@ -17,6 +17,7 @@ class _RegisterPageState extends State<RegisterPage> {
   late TextEditingController nama;
   late TextEditingController email;
   late TextEditingController password;
+  late TextEditingController namaL;
 
   @override
   void initState() {
@@ -24,6 +25,7 @@ class _RegisterPageState extends State<RegisterPage> {
     nama = TextEditingController();
     email = TextEditingController();
     password = TextEditingController();
+    namaL = TextEditingController();
   }
 
   final _authClient = AuthService();
@@ -65,6 +67,17 @@ class _RegisterPageState extends State<RegisterPage> {
                           TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
                     ),
                     new Padding(padding: new EdgeInsets.all(12)),
+                    new Padding(
+                      padding: new EdgeInsets.symmetric(horizontal: 50),
+                      child: new TextField(
+                        controller: namaL,
+                        decoration: new InputDecoration(
+                            contentPadding: new EdgeInsets.all(10.0),
+                            hintText: "Masukan Nama Lengkap",
+                            border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(20))),
+                      ),
+                    ),
                     new Padding(
                       padding: new EdgeInsets.symmetric(horizontal: 50),
                       child: new TextField(
@@ -121,7 +134,8 @@ class _RegisterPageState extends State<RegisterPage> {
                                             await _authClient.registerUser(
                                                 name: nama.text,
                                                 email: email.text,
-                                                password: password.text);
+                                                password: password.text,
+                                                namalengkap: namaL.text);
 
                                         if (user != null) {
                                           Navigator.of(context)
@@ -129,9 +143,9 @@ class _RegisterPageState extends State<RegisterPage> {
                                                   MaterialPageRoute(
                                                     builder: (contex) =>
                                                         AppScreen(
-                                                            user: user[0],
-                                                            detailuser:
-                                                                user[1]),
+                                                      user: user[0],
+                                                      detailuser: user[1],
+                                                    ),
                                                   ),
                                                   (route) => false);
                                         }

@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -5,10 +6,12 @@ import 'post.dart';
 import 'profile.dart';
 import 'auth_service.dart';
 import 'add_post.dart';
+import 'pawang/post_handler.dart';
 
 class AppScreen extends StatefulWidget {
   final User user;
   final Users detailuser;
+
   const AppScreen({Key? key, required this.user, required this.detailuser})
       : super(key: key);
 
@@ -17,6 +20,15 @@ class AppScreen extends StatefulWidget {
 }
 
 class _AppScreenState extends State<AppScreen> {
+  AuthService as = new AuthService();
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    PostHandler().showHome();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
