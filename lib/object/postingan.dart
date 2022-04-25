@@ -1,34 +1,37 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '../auth_service.dart';
 
 import '../pawang/post_handler.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class PostModel {
   String? id_user;
   final String picname;
-  final DateTime date = DateTime.now();
+  DateTime? date = DateTime.now();
   final String title;
-  final String description;
+  String? description;
   String? alamat = null;
   String? typepost = "";
   String? desc_type = 'quotes';
   String? owner_id;
-  String? id;
-  String username = "username";
-  String nameL = "namal";
+  String? id = "fdfdf";
+  String? username = "username";
+  String? nameL = "namal";
 
   PostModel(
       {required this.id_user,
       required this.picname,
       required this.title,
-      required this.description,
+      this.description,
       required this.alamat,
       required this.typepost,
       required this.owner_id,
       required this.desc_type,
-      required this.id});
+      this.id,
+      this.date});
 
   Map<String, dynamic> toJson() => {
         'id_user': id_user,
@@ -52,6 +55,7 @@ class PostModel {
       typepost: json['typepost'],
       owner_id: json['owner_id'],
       desc_type: json['desc_type'],
+      date: json['date'] == "null" ? DateTime.now() : DateTime.now(),
       id: json['id']);
 }
 
@@ -59,9 +63,38 @@ class PostWid extends StatelessWidget {
   final PostModel post;
   final Users ud;
   final String uid;
-  const PostWid(
-      {Key? key, required this.post, required this.ud, required this.uid})
+  var ph = new PostHandler();
+  var imgdownload;
+  AuthService au = new AuthService();
+
+  var ser;
+
+  PostWid(
+      {Key? key,
+      required this.post,
+      required this.ud,
+      required this.uid,
+      this.imgdownload})
       : super(key: key);
+
+  Future<void> _downloadurl() async {
+    imgdownload = await ph.getImageDownload(post.picname, post.id!);
+  }
+
+  Future<void> _getUserDetail() async {
+    final fireuser = await FirebaseAuth.instance.currentUser;
+    if (fireuser != null) {
+      await FirebaseFirestore.instance
+          .collection("users_detail")
+          .doc(fireuser.uid)
+          .get()
+          .then((value) {
+        ser = Users.fromJson(value.data() as dynamic);
+      }).catchError((e) {
+        print("the error is : " + e.toString());
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -118,7 +151,7 @@ class PostWid extends StatelessWidget {
                     borderRadius: BorderRadius.circular(30),
                     boxShadow: [
                       BoxShadow(
-                          color: Color.fromARGB(111, 0, 0, 0),
+                          color: Color.fromARGB(109, 0, 0, 0),
                           spreadRadius: 5,
                           blurRadius: 7)
                     ],
@@ -192,7 +225,8 @@ class PostWid extends StatelessWidget {
                           )
                         ],
                       ),
-                      new Text(post.description),
+                      new Text(
+                          post.description != null ? post.description! : "lol"),
                       new Padding(padding: new EdgeInsets.all(10)),
                       new Row(
                         children: [
@@ -221,40 +255,81 @@ class PostWid extends StatelessWidget {
             child: new SizedBox(
               width: 410,
               height: 200,
-              child: new Container(
-                margin: new EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(30),
-                    boxShadow: [
-                      BoxShadow(
-                          color: Color.fromARGB(50, 0, 0, 0),
-                          spreadRadius: 5,
-                          blurRadius: 7)
-                    ],
-                    image: DecorationImage(
-                        image: new NetworkImage(PostHandler()
-                            .getImageDownload(post.picname, post.id!)),
-                        fit: BoxFit.cover)),
-                child: new Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    Container(
+              child: FutureBuilder(
+                  future: _downloadurl(),
+                  builder: (context, snapshot) {
+                    if (imgdownload != "null" && imgdownload != null) {
+                      return new Container(
                         margin: new EdgeInsets.all(10),
-                        decoration:
-                            BoxDecoration(shape: BoxShape.circle, boxShadow: [
-                          BoxShadow(
-                            color: Color.fromARGB(100, 0, 0, 0),
-                            blurRadius: 5.0,
-                          ),
-                        ]),
-                        child: Icon(
-                          Icons.info_outline_rounded,
-                          color: Color.fromARGB(255, 255, 255, 255),
-                          size: 25,
-                        )),
-                  ],
-                ),
-              ),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(30),
+                          image: DecorationImage(
+                              image: NetworkImage(imgdownload),
+                              fit: BoxFit.cover),
+                          boxShadow: [
+                            BoxShadow(
+                                color: Color.fromARGB(50, 0, 0, 0),
+                                spreadRadius: 5,
+                                blurRadius: 7)
+                          ],
+                        ),
+                        child: new Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            Container(
+                                margin: new EdgeInsets.all(10),
+                                decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Color.fromARGB(100, 0, 0, 0),
+                                        blurRadius: 5.0,
+                                      ),
+                                    ]),
+                                child: Icon(
+                                  Icons.info_outline_rounded,
+                                  color: Color.fromARGB(255, 255, 255, 255),
+                                  size: 25,
+                                ))
+                          ],
+                        ),
+                      );
+                    } else {
+                      return new Container(
+                        margin: new EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: Colors.yellow,
+                          borderRadius: BorderRadius.circular(30),
+                          boxShadow: [
+                            BoxShadow(
+                                color: Color.fromARGB(50, 0, 0, 0),
+                                spreadRadius: 5,
+                                blurRadius: 7)
+                          ],
+                        ),
+                        child: new Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            Container(
+                                margin: new EdgeInsets.all(10),
+                                decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Color.fromARGB(100, 0, 0, 0),
+                                        blurRadius: 5.0,
+                                      ),
+                                    ]),
+                                child: Icon(
+                                  Icons.info_outline_rounded,
+                                  color: Color.fromARGB(255, 255, 255, 255),
+                                  size: 25,
+                                ))
+                          ],
+                        ),
+                      );
+                    }
+                  }),
             ),
           ),
           new SizedBox(
@@ -269,8 +344,6 @@ class PostWid extends StatelessWidget {
                     new CircleAvatar(
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(50.0),
-                        child: new Image.network(PostHandler()
-                            .getImageDownload(post.picname, post.id!)),
                       ),
                     ),
                     new Padding(padding: EdgeInsets.symmetric(horizontal: 4)),
@@ -278,28 +351,73 @@ class PostWid extends StatelessWidget {
                       child: new Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          new Row(
-                            children: [
-                              new Text(
-                                ud.username,
-                                style: new TextStyle(
-                                    fontSize: 15,
-                                    color: Colors.black,
-                                    fontWeight: FontWeight.bold),
-                              ),
-                              ud.level == "artisan"
-                                  ? new Icon(
-                                      Icons.verified,
-                                      color: Color.fromARGB(255, 82, 192, 232),
-                                    )
-                                  : new Icon(
-                                      Icons.verified,
-                                      color: Color.fromARGB(255, 190, 182, 65),
+                          FutureBuilder(
+                              future: _getUserDetail(),
+                              builder: (context, snapshot) {
+                                if (imgdownload != "null" &&
+                                    imgdownload != null) {
+                                  return Row(
+                                    children: [
+                                      new Text(
+                                        ud.username,
+                                        style: new TextStyle(
+                                            fontSize: 15,
+                                            color: Colors.black,
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                      ud.level == "artisan"
+                                          ? new Icon(
+                                              Icons.verified,
+                                              color: Color.fromARGB(
+                                                  255, 82, 192, 232),
+                                            )
+                                          : new Icon(
+                                              Icons.verified,
+                                              color: Color.fromARGB(
+                                                  255, 190, 182, 65),
+                                            ),
+                                    ],
+                                  );
+                                } else {
+                                  return new Container(
+                                    margin: new EdgeInsets.all(10),
+                                    decoration: BoxDecoration(
+                                      color: Colors.yellow,
+                                      borderRadius: BorderRadius.circular(30),
+                                      boxShadow: [
+                                        BoxShadow(
+                                            color: Color.fromARGB(50, 0, 0, 0),
+                                            spreadRadius: 5,
+                                            blurRadius: 7)
+                                      ],
                                     ),
-                            ],
-                          ),
+                                    child: new Row(
+                                      mainAxisAlignment: MainAxisAlignment.end,
+                                      children: [
+                                        Container(
+                                            margin: new EdgeInsets.all(10),
+                                            decoration: BoxDecoration(
+                                                shape: BoxShape.circle,
+                                                boxShadow: [
+                                                  BoxShadow(
+                                                    color: Color.fromARGB(
+                                                        100, 0, 0, 0),
+                                                    blurRadius: 5.0,
+                                                  ),
+                                                ]),
+                                            child: Icon(
+                                              Icons.info_outline_rounded,
+                                              color: Color.fromARGB(
+                                                  255, 255, 255, 255),
+                                              size: 25,
+                                            ))
+                                      ],
+                                    ),
+                                  );
+                                }
+                              }),
                           new Row(
-                            children: [new Text("Berada dalam naungan")],
+                            children: [new Text("Berada di" + post.alamat!)],
                           ),
                           new Row(
                             children: [

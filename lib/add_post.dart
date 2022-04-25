@@ -56,19 +56,17 @@ class _AddPostPageState extends State<AddPostPage> {
     super.initState();
     FirebaseAuth.instance.authStateChanges().listen((User? user) {
       if (user == null) {
-        print('User is currently signed out!');
+        print('User is currently signed out');
 
         Navigator.push(this.context,
             MaterialPageRoute(builder: (context) => new LoginPage()));
       } else {
-        print('User is signed in!');
+        print('User is signed in');
         setState(() {
           isLogin = true;
           userD = user;
         });
       }
-
-      post1.showHome();
     });
 
     title = new TextEditingController();
@@ -89,7 +87,7 @@ class _AddPostPageState extends State<AddPostPage> {
   Future<void> _showMyDialog() async {
     return showDialog<void>(
       context: this.context,
-      barrierDismissible: false, // user must tap button!
+      barrierDismissible: false, // user must tap button
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('AlertDialog Title'),
@@ -329,9 +327,9 @@ class _AddPostPageState extends State<AddPostPage> {
                     onPressed: () async {
                       if (_formkey.currentState!.validate() && photo != null) {
                         PostModel model = PostModel(
-                            alamat: alamat!.text,
-                            description: desc!.text,
-                            title: title!.text,
+                            alamat: alamat.text,
+                            description: desc.text,
+                            title: title.text,
                             id_user: userD!.uid,
                             desc_type: cqval,
                             owner_id: "fasgrwhwehfdh",
@@ -345,8 +343,7 @@ class _AddPostPageState extends State<AddPostPage> {
                         await Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => new AppScreen(
-                                    user: userD!, detailuser: du!)));
+                                builder: (context) => new AppScreen()));
                       } else {
                         print('error');
                       }

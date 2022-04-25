@@ -24,8 +24,9 @@ class PostHandler {
     var docUser = postLib.collection('post_collection').doc();
 
     PostModel pm = PostModel(
+        date: DateTime.now(),
         id_user: post.id_user,
-        picname: post.picname,
+        picname: "postingannya-" + docUser.id,
         title: post.title,
         description: post.description,
         alamat: post.alamat,
@@ -33,41 +34,28 @@ class PostHandler {
         owner_id: post.owner_id,
         desc_type: post.desc_type,
         id: docUser.id);
+
     final dU = pm.toJson();
     final id_post = docUser.id;
 
     await docUser.set(dU);
 
-    final String photoname = "Fotonya-$id_post";
+    final String photoname = "postingannya-$id_post";
     await postStorage.ref('thepost/$id_post/$photoname').putFile(image);
     print("mencoba eksekusi");
   }
 
   getImageDownload(String url, String postid) async {
-    String downloadUrl =
-        await postStorage.ref('thepost/$postid/$url').getDownloadURL();
-    return downloadUrl;
-  }
-
-  showHome() async {
-    print("ssss");
-    List<PostModel>? postmodel;
-    QuerySnapshot querySnapshot =
-        await postLib.collection("post_collection").get();
-
-    // Get data from docs and convert map to List
-    final allData = querySnapshot.docs.map((doc) {
-      return doc.data();
-    }).toList();
-
-    var lol = allData.map((e) {
-      print("fsd");
-      var ud2 = postLib
-          .collection("users_detail")
-          .where("id_user", isEqualTo: (e as dynamic)['id_user'])
-          .get()
-          .then((value) => print("lf"));
-    });
-    print(ud);
+    print("postingan : " + url);
+    try {
+      var downloadUrl = postStorage;
+      String downloadLink =
+          await downloadUrl.ref("thepost/$postid/$url").getDownloadURL();
+      print("ada gan");
+      return downloadLink;
+    } catch (error) {
+      print('file not found');
+      return "[kosong]";
+    }
   }
 }

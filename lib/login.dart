@@ -119,10 +119,7 @@ class _LoginPageState extends State<LoginPage> {
                                               .pushAndRemoveUntil(
                                                   MaterialPageRoute(
                                                       builder: (contex) =>
-                                                          AppScreen(
-                                                            user: user[0],
-                                                            detailuser: user[1],
-                                                          )),
+                                                          AppScreen()),
                                                   (route) => false);
                                         }
                                       },

@@ -142,10 +142,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                               .pushAndRemoveUntil(
                                                   MaterialPageRoute(
                                                     builder: (contex) =>
-                                                        AppScreen(
-                                                      user: user[0],
-                                                      detailuser: user[1],
-                                                    ),
+                                                        AppScreen(),
                                                   ),
                                                   (route) => false);
                                         }
