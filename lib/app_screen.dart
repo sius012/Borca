@@ -1,3 +1,6 @@
+import 'dart:math';
+
+import 'package:borca2/login.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -27,7 +30,15 @@ class _AppScreenState extends State<AppScreen> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    showHome();
+    var check = FirebaseAuth.instance.authStateChanges().listen((event) {
+      if (event != null) {
+        print("antum wes login");
+      } else {
+        print("anda durung login");
+        Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (context) => LoginPage()));
+      }
+    });
   }
 
   Future _fetch() async {

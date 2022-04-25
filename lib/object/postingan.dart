@@ -175,9 +175,14 @@ class PostWid extends StatelessWidget {
                         children: [
                           new Row(
                             children: [
-                              new SvgPicture.asset(
-                                "assets/icons/heart.svg",
-                                width: 20,
+                              GestureDetector(
+                                onTap: () {
+                                  print("lol");
+                                },
+                                child: new SvgPicture.asset(
+                                  "assets/icons/heart.svg",
+                                  width: 20,
+                                ),
                               ),
                               new Padding(padding: new EdgeInsets.all(3)),
                               new Text(

@@ -6,6 +6,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import '../object/postingan.dart';
+import '../object/like.dart';
 import '../auth_service.dart';
 
 class PostHandler {
@@ -17,6 +18,23 @@ class PostHandler {
 
   udAdd(Users u) {
     ud.add(ud);
+  }
+
+  likepost(Like liked, String uid) {
+    //check before like
+    var jml;
+    var get = FirebaseFirestore.instance
+        .collection("like")
+        .where("id_liker", isEqualTo: uid)
+        .where("id_post", isEqualTo: liked.id_post)
+        .get()
+        .then((value) => jml = value.size);
+    print("jumlahnya = " + jml);
+    if (jml < 1) {
+      var like = FirebaseFirestore.instance.collection("like").doc();
+      var likedata = liked.toJson();
+      like.set(likedata);
+    }
   }
 
   postingbos(PostModel post, File image) async {
