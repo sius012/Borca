@@ -54,9 +54,8 @@ class _AppScreenState extends State<AppScreen> {
       }).catchError((e) {
         print("the error is : " + e.toString());
       });
+      return "wokrd";
     }
-
-    return "wokrd";
   }
 
   showHome() async {
@@ -84,128 +83,158 @@ class _AppScreenState extends State<AppScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: new AppBar(
-        backgroundColor: Color.fromARGB(255, 255, 255, 255),
-        title: new GestureDetector(
-            onTap: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const Profile()),
-                ),
-            child: new SvgPicture.asset(
-              "assets/icons/borca_logotext.svg",
-              height: 20,
-            )),
-        actions: [
-          new Padding(
-            padding: EdgeInsets.all(10),
-            child: new Row(
-              children: [
-                new FutureBuilder(
-                  future: _fetch(),
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState != ConnectionState.done) {
+        appBar: new AppBar(
+          backgroundColor: Color.fromARGB(255, 255, 255, 255),
+          title: new GestureDetector(
+              onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => new Profile()),
+                  ),
+              child: new SvgPicture.asset(
+                "assets/icons/borca_logotext.svg",
+                height: 20,
+              )),
+          actions: [
+            new Padding(
+              padding: EdgeInsets.all(10),
+              child: new Row(
+                children: [
+                  new FutureBuilder(
+                    future: _fetch(),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState != ConnectionState.done) {
+                        return new Text(
+                          "Sabar bang.....",
+                          style: new TextStyle(
+                              color: Colors.black, fontWeight: FontWeight.bold),
+                        );
+                      }
                       return new Text(
-                        "Sabar bang.....",
+                        ud!.namaL,
                         style: new TextStyle(
                             color: Colors.black, fontWeight: FontWeight.bold),
                       );
-                    }
-                    return new Text(
-                      ud!.namaL,
-                      style: new TextStyle(
-                          color: Colors.black, fontWeight: FontWeight.bold),
-                    );
-                  },
-                ),
-                new Icon(
-                  Icons.keyboard_arrow_down_rounded,
-                  color: Colors.black,
-                ),
-                new Icon(
-                  Icons.notifications,
-                  color: Colors.black,
-                ),
-              ],
+                    },
+                  ),
+                  new Icon(
+                    Icons.keyboard_arrow_down_rounded,
+                    color: Colors.black,
+                  ),
+                  new Icon(
+                    Icons.notifications,
+                    color: Colors.black,
+                  ),
+                ],
+              ),
+            )
+          ],
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.vertical(
+              bottom: Radius.circular(22),
             ),
-          )
-        ],
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(
-            bottom: Radius.circular(22),
           ),
         ),
-      ),
-      backgroundColor: Color.fromARGB(255, 255, 255, 255),
-      body: FutureBuilder(
-          future: _fetch(),
-          builder: (context, snapshot) {
-            if (snapshot.hasData) {
-              return StreamBuilder(
-                  stream: FirebaseFirestore.instance
-                      .collection('post_collection')
-                      .snapshots(),
-                  builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
-                    if (snapshot.hasError) {
-                      return Text(snapshot.error.toString());
-                    } else if (snapshot.hasData) {
-                      return ListView(
-                          children: snapshot.data!.docs.map((e) {
-                        PostModel postModel =
-                            PostModel.fromJson(e.data() as dynamic);
-                        return FutureBuilder(
-                            future: _fetch(),
-                            builder: (context, snapshot) {
-                              if (snapshot.hasData) {
-                                return PostWid(
-                                    post: postModel, ud: ud!, uid: u!.uid);
-                              }
-                              return CircularProgressIndicator();
-                            });
-                      }).toList());
-                    }
-                    return Text("fd");
-                  });
-            }
-            return CircularProgressIndicator();
-          }),
-      bottomNavigationBar: Container(
-          decoration: BoxDecoration(
-            color: Color.fromARGB(0, 0, 0, 0),
-            borderRadius: BorderRadius.only(
-                topRight: Radius.circular(30), topLeft: Radius.circular(30)),
-            boxShadow: [
-              BoxShadow(color: Colors.black38, spreadRadius: 0, blurRadius: 10),
-            ],
-          ),
-          child: ClipRRect(
+        backgroundColor: Color.fromARGB(255, 255, 255, 255),
+        body: FutureBuilder(
+            future: _fetch(),
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                return StreamBuilder(
+                    stream: FirebaseFirestore.instance
+                        .collection('post_collection')
+                        .snapshots(),
+                    builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+                      if (snapshot.hasError) {
+                        return Text(snapshot.error.toString());
+                      } else if (snapshot.hasData) {
+                        return ListView(
+                            children: snapshot.data!.docs.map((e) {
+                          PostModel postModel =
+                              PostModel.fromJson(e.data() as dynamic);
+                          return FutureBuilder(
+                              future: _fetch(),
+                              builder: (context, snapshot) {
+                                if (snapshot.hasData) {
+                                  return PostWid(
+                                      post: postModel, ud: ud!, uid: u!.uid);
+                                }
+                                return CircularProgressIndicator();
+                              });
+                        }).toList());
+                      }
+                      return Text("fd");
+                    });
+              }
+              return CircularProgressIndicator();
+            }),
+        bottomNavigationBar: Container(
+            decoration: BoxDecoration(
               borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(30.0),
-                topRight: Radius.circular(30.0),
-              ),
-              child: new Padding(
-                padding: new EdgeInsets.all(0),
-                child: BottomNavigationBar(items: [
-                  BottomNavigationBarItem(
-                      icon: Icon(
-                        Icons.home,
-                      ),
-                      label: "Beranda"),
-                  BottomNavigationBarItem(
-                      icon: new GestureDetector(
-                        child: new SvgPicture.asset(
-                          "assets/icons/add_post.svg",
-                          height: 30,
-                        ),
-                        onTap: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => const AddPostPage()),
-                        ),
-                      ),
-                      label: ""),
-                  BottomNavigationBarItem(icon: Icon(Icons.home), label: "")
-                ]),
-              ))),
-    );
+                  topRight: Radius.circular(30), topLeft: Radius.circular(30)),
+              boxShadow: [
+                BoxShadow(
+                    color: Colors.black38, spreadRadius: 0, blurRadius: 10),
+              ],
+            ),
+            child: BottomNavigationBar(
+              showSelectedLabels: false,
+              showUnselectedLabels: false,
+              type: BottomNavigationBarType.fixed,
+              items: [
+                //home
+
+                //favorite
+                BottomNavigationBarItem(
+                  icon: Icon(
+                    Icons.home,
+                  ),
+                  activeIcon: Icon(
+                    Icons.home,
+                  ),
+                  label: '',
+                ),
+                //loockback
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.list),
+                  activeIcon: Icon(Icons.bar_chart),
+                  label: '',
+                ),
+                BottomNavigationBarItem(
+                  icon: new GestureDetector(
+                    child: new SvgPicture.asset(
+                      "assets/icons/add_post.svg",
+                      height: 30,
+                    ),
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const AddPostPage()),
+                    ),
+                  ),
+                  activeIcon: Icon(Icons.bar_chart),
+                  label: '',
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.bar_chart),
+                  activeIcon: Icon(Icons.bar_chart),
+                  label: '',
+                ),
+
+                //info & support
+                BottomNavigationBarItem(
+                  icon: GestureDetector(
+                    child: Icon(Icons.account_circle),
+                    onTap: () {
+                      Navigator.push(context,
+                          MaterialPageRoute(builder: (contex) {
+                        return new Profile();
+                      }));
+                    },
+                  ),
+                  activeIcon: Icon(Icons.info),
+                  label: '',
+                ),
+              ],
+            )));
   }
 }
