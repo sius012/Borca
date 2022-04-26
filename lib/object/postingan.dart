@@ -109,6 +109,40 @@ class _PostWidState extends State<PostWid> {
       .get()
       .then((value) => likepost = value.size);
 
+  Future<void> _showauction() async {
+    return showDialog<void>(
+      context: this.context,
+      barrierDismissible: false, // user must tap button
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Lelang'),
+          content: Container(
+            width: 150,
+            height: 100,
+            child: Form(
+              child: ListView(
+                children: <Widget>[
+                  Text('Nominal Pelelangan'),
+                  TextFormField(
+                    decoration: InputDecoration(),
+                  )
+                ],
+              ),
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Ok'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return new SizedBox(
@@ -238,9 +272,14 @@ class _PostWidState extends State<PostWid> {
                           widget.post.typepost != "Main Post"
                               ? new Row(
                                   children: [
-                                    new SvgPicture.asset(
-                                      "assets/icons/bid.svg",
-                                      width: 20,
+                                    new GestureDetector(
+                                      onTap: () {
+                                        _showauction();
+                                      },
+                                      child: new SvgPicture.asset(
+                                        "assets/icons/bid.svg",
+                                        width: 20,
+                                      ),
                                     ),
                                     new Padding(padding: new EdgeInsets.all(3)),
                                     new Text(
