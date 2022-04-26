@@ -6,6 +6,8 @@ import '../auth_service.dart';
 
 import '../pawang/post_handler.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import '../pawang/post_handler.dart';
+import 'like.dart';
 
 class PostModel {
   String? id_user;
@@ -59,26 +61,31 @@ class PostModel {
       id: json['id']);
 }
 
-class PostWid extends StatelessWidget {
+class PostWid extends StatefulWidget {
   final PostModel post;
   final Users ud;
   final String uid;
-  var ph = new PostHandler();
+
+  PostWid({Key? key, required this.post, required this.ud, required this.uid})
+      : super(key: key);
+
+  @override
+  State<PostWid> createState() => _PostWidState();
+}
+
+class _PostWidState extends State<PostWid> {
+  int? likepost;
   var imgdownload;
+  PostHandler ph = new PostHandler();
+  Color likec = Colors.black;
+
   AuthService au = new AuthService();
 
   var ser;
 
-  PostWid(
-      {Key? key,
-      required this.post,
-      required this.ud,
-      required this.uid,
-      this.imgdownload})
-      : super(key: key);
-
   Future<void> _downloadurl() async {
-    imgdownload = await ph.getImageDownload(post.picname, post.id!);
+    imgdownload =
+        await ph.getImageDownload(widget.post.picname, widget.post.id!);
   }
 
   Future<void> _getUserDetail() async {
@@ -95,6 +102,12 @@ class PostWid extends StatelessWidget {
       });
     }
   }
+
+  Future _getLikeInfo() async => await FirebaseFirestore.instance
+      .collection("like")
+      .where('id_post', isEqualTo: widget.post.id!)
+      .get()
+      .then((value) => likepost = value.size);
 
   @override
   Widget build(BuildContext context) {
@@ -173,27 +186,56 @@ class PostWid extends StatelessWidget {
                       new Padding(padding: new EdgeInsets.only(bottom: 50)),
                       new Row(
                         children: [
-                          new Row(
-                            children: [
-                              GestureDetector(
-                                onTap: () {
-                                  print("lol");
-                                },
-                                child: new SvgPicture.asset(
-                                  "assets/icons/heart.svg",
-                                  width: 20,
-                                ),
-                              ),
-                              new Padding(padding: new EdgeInsets.all(3)),
-                              new Text(
-                                "12k",
-                                style: TextStyle(
-                                    fontWeight: FontWeight.bold, fontSize: 14),
-                              )
-                            ],
-                          ),
+                          FutureBuilder(
+                              future: _getLikeInfo(),
+                              builder: (context, snapshot) {
+                                if (snapshot.hasData) {
+                                  return new Row(
+                                    children: [
+                                      GestureDetector(
+                                        onTap: () async {
+                                          Like like = Like(
+                                              id_liker: widget.uid,
+                                              id_post: widget.post.id!,
+                                              like_date:
+                                                  DateTime.now().toString());
+                                          bool des = await ph.likepost(
+                                              like, widget.uid);
+
+                                          print(des);
+                                          if (des == true) {
+                                            setState(() {
+                                              likec = Colors.red;
+                                            });
+                                          } else {
+                                            print("fsf");
+                                            setState(() {
+                                              likec =
+                                                  Color.fromARGB(255, 0, 0, 0);
+                                            });
+                                          }
+                                        },
+                                        child: new SvgPicture.asset(
+                                          "assets/icons/heart.svg",
+                                          width: 20,
+                                          color: likec,
+                                        ),
+                                      ),
+                                      new Padding(
+                                          padding: new EdgeInsets.all(3)),
+                                      new Text(
+                                        likepost.toString(),
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 14),
+                                      )
+                                    ],
+                                  );
+                                }
+                                return CircularProgressIndicator();
+                              }),
                           new Padding(padding: new EdgeInsets.all(10)),
-                          post.typepost != "Main Post"
+                          widget.post.typepost != "Main Post"
                               ? new Row(
                                   children: [
                                     new SvgPicture.asset(
@@ -216,12 +258,12 @@ class PostWid extends StatelessWidget {
                       new Row(
                         children: [
                           new Text(
-                            ud.namaL,
+                            widget.ud.namaL,
                             style: TextStyle(
                                 fontSize: 12, fontWeight: FontWeight.bold),
                           ),
                           new Text(
-                            post.desc_type == "Caption"
+                            widget.post.desc_type == "Caption"
                                 ? "Menambahkan Sebuah Caption"
                                 : "Menambahkan Sebuah Quotes",
                             style: TextStyle(
@@ -230,8 +272,9 @@ class PostWid extends StatelessWidget {
                           )
                         ],
                       ),
-                      new Text(
-                          post.description != null ? post.description! : "lol"),
+                      new Text(widget.post.description != null
+                          ? widget.post.description!
+                          : "lol"),
                       new Padding(padding: new EdgeInsets.all(10)),
                       new Row(
                         children: [
@@ -364,13 +407,13 @@ class PostWid extends StatelessWidget {
                                   return Row(
                                     children: [
                                       new Text(
-                                        ud.username,
+                                        widget.ud.username,
                                         style: new TextStyle(
                                             fontSize: 15,
                                             color: Colors.black,
                                             fontWeight: FontWeight.bold),
                                       ),
-                                      ud.level == "artisan"
+                                      widget.ud.level == "artisan"
                                           ? new Icon(
                                               Icons.verified,
                                               color: Color.fromARGB(
@@ -422,7 +465,9 @@ class PostWid extends StatelessWidget {
                                 }
                               }),
                           new Row(
-                            children: [new Text("Berada di" + post.alamat!)],
+                            children: [
+                              new Text("Berada di" + widget.post.alamat!)
+                            ],
                           ),
                           new Row(
                             children: [

@@ -20,20 +20,33 @@ class PostHandler {
     ud.add(ud);
   }
 
-  likepost(Like liked, String uid) {
+  likepost(Like liked, String uid) async {
     //check before like
-    var jml;
-    var get = FirebaseFirestore.instance
+    var jml = 0;
+    var get = await FirebaseFirestore.instance
         .collection("like")
         .where("id_liker", isEqualTo: uid)
         .where("id_post", isEqualTo: liked.id_post)
         .get()
         .then((value) => jml = value.size);
-    print("jumlahnya = " + jml);
+    print("jumlahnya = " + jml.toString());
     if (jml < 1) {
       var like = FirebaseFirestore.instance.collection("like").doc();
-      var likedata = liked.toJson();
-      like.set(likedata);
+      var likedata = await liked.toJson();
+      await like.set(likedata);
+      return true;
+    } else {
+      print("dgs");
+      var liko = await FirebaseFirestore.instance
+          .collection("like")
+          .where("id_liker", isEqualTo: uid)
+          .where("id_post", isEqualTo: liked.id_post)
+          .get()
+          .then((value) {
+        value.docs.first.reference.delete();
+        print("dsgs");
+      });
+      return false;
     }
   }
 

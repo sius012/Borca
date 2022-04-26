@@ -189,7 +189,7 @@ class _AppScreenState extends State<AppScreen> {
                       icon: Icon(
                         Icons.home,
                       ),
-                      label: ""),
+                      label: "Beranda"),
                   BottomNavigationBarItem(
                       icon: new GestureDetector(
                         child: new SvgPicture.asset(
