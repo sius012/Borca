@@ -63,11 +63,8 @@ class PostModel {
 
 class PostWid extends StatefulWidget {
   final PostModel post;
-  final Users ud;
-  final String uid;
 
-  PostWid({Key? key, required this.post, required this.ud, required this.uid})
-      : super(key: key);
+  PostWid({Key? key, required this.post}) : super(key: key);
 
   @override
   State<PostWid> createState() => _PostWidState();
@@ -76,38 +73,53 @@ class PostWid extends StatefulWidget {
 class _PostWidState extends State<PostWid> {
   int? likepost;
   var imgdownload;
+  bool haslike = false;
   PostHandler ph = new PostHandler();
   Color likec = Colors.black;
 
   AuthService au = new AuthService();
 
-  var ser;
+  Users? ser;
 
   Future<void> _downloadurl() async {
     imgdownload =
         await ph.getImageDownload(widget.post.picname, widget.post.id!);
   }
 
-  Future<void> _getUserDetail() async {
-    final fireuser = await FirebaseAuth.instance.currentUser;
-    if (fireuser != null) {
-      await FirebaseFirestore.instance
-          .collection("users_detail")
-          .doc(fireuser.uid)
-          .get()
-          .then((value) {
-        ser = Users.fromJson(value.data() as dynamic);
-      }).catchError((e) {
-        print("the error is : " + e.toString());
-      });
-    }
+  Future _getUserDetail() async {
+    var ikan = FirebaseFirestore.instance
+        .collection("users_detail")
+        .doc(widget.post.id_user)
+        .get()
+        .then((value) async {
+      ser = Users.fromJson(value.data() as dynamic);
+
+      print("data is${value.data() as dynamic}");
+    });
+
+    return "hai";
   }
 
-  Future _getLikeInfo() async => await FirebaseFirestore.instance
-      .collection("like")
-      .where('id_post', isEqualTo: widget.post.id!)
-      .get()
-      .then((value) => likepost = value.size);
+  Future _getLikeInfo() async {
+    await FirebaseFirestore.instance
+        .collection("like")
+        .where('id_post', isEqualTo: widget.post.id)
+        .get()
+        .then((value) {
+      likepost = value.size;
+    });
+
+    await FirebaseFirestore.instance
+        .collection("like")
+        .where('id_post', isEqualTo: widget.post.id!)
+        .where("id_liker", isEqualTo: widget.post.id_user)
+        .get()
+        .then((value) {
+      if (value.size > 0) {
+        likec = Colors.red;
+      }
+    });
+  }
 
   Future<void> _showauction() async {
     return showDialog<void>(
@@ -160,36 +172,22 @@ class _PostWidState extends State<PostWid> {
                 child: new Container(
                   child: new Column(
                     children: [
-                      new Padding(padding: new EdgeInsets.only(bottom: 50)),
-                      new Container(
-                        decoration: BoxDecoration(
-                            border: Border.all(
-                                width: 2.0,
-                                color: Color.fromARGB(255, 230, 230, 230)),
-                            borderRadius: BorderRadius.only(
-                                bottomLeft: Radius.circular(10),
-                                bottomRight: Radius.circular(10))),
-                        child: new Padding(
-                          padding: new EdgeInsets.all(10),
-                          child: new Row(
-                            children: [
-                              new Row(
-                                children: [
-                                  new CircleAvatar(
-                                    child: ClipRRect(
-                                      borderRadius: BorderRadius.circular(50.0),
-                                      child: Image.asset("assets/pp/pp.jpeg"),
-                                    ),
-                                  ),
-                                ],
+                      new Padding(padding: new EdgeInsets.only(bottom: 80)),
+                      new TextField(
+                        decoration: InputDecoration(
+                            prefixIcon: Padding(
+                              padding: new EdgeInsets.all(10),
+                              child: new CircleAvatar(
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(50.0),
+                                  child: Image.asset("assets/pp/pp.jpeg"),
+                                ),
                               ),
-                              new Padding(padding: EdgeInsets.only(right: 10)),
-                              new Text("tambahkan Komentar"),
-                              new Spacer(),
-                              new Icon(Icons.send)
-                            ],
-                          ),
-                        ),
+                            ),
+                            suffixIcon: IconButton(
+                              icon: Icon(Icons.send),
+                              onPressed: () {},
+                            )),
                       ),
                     ],
                   ),
@@ -223,18 +221,19 @@ class _PostWidState extends State<PostWid> {
                           FutureBuilder(
                               future: _getLikeInfo(),
                               builder: (context, snapshot) {
-                                if (snapshot.hasData) {
+                                if (snapshot.connectionState ==
+                                    ConnectionState.done) {
                                   return new Row(
                                     children: [
                                       GestureDetector(
                                         onTap: () async {
                                           Like like = Like(
-                                              id_liker: widget.uid,
+                                              id_liker: widget.post.id_user!,
                                               id_post: widget.post.id!,
                                               like_date:
                                                   DateTime.now().toString());
                                           bool des = await ph.likepost(
-                                              like, widget.uid);
+                                              like, widget.post.id_user!);
 
                                           print(des);
                                           if (des == true) {
@@ -269,7 +268,7 @@ class _PostWidState extends State<PostWid> {
                                 return CircularProgressIndicator();
                               }),
                           new Padding(padding: new EdgeInsets.all(10)),
-                          widget.post.typepost != "Main Post"
+                          widget.post.typepost != "Main post"
                               ? new Row(
                                   children: [
                                     new GestureDetector(
@@ -296,11 +295,21 @@ class _PostWidState extends State<PostWid> {
                       new Padding(padding: EdgeInsets.all(10)),
                       new Row(
                         children: [
-                          new Text(
-                            widget.ud.namaL,
-                            style: TextStyle(
-                                fontSize: 12, fontWeight: FontWeight.bold),
-                          ),
+                          FutureBuilder(
+                              future: _getUserDetail(),
+                              builder: (context, snapshot) {
+                                if (snapshot.connectionState ==
+                                    ConnectionState.done) {
+                                  return new Text(
+                                    ser!.namaL,
+                                    style: TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.bold),
+                                  );
+                                }
+
+                                return SizedBox();
+                              }),
                           new Text(
                             widget.post.desc_type == "Caption"
                                 ? "Menambahkan Sebuah Caption"
@@ -311,9 +320,13 @@ class _PostWidState extends State<PostWid> {
                           )
                         ],
                       ),
-                      new Text(widget.post.description != null
-                          ? widget.post.description!
-                          : "lol"),
+                      Row(
+                        children: [
+                          new Text(widget.post.description != null
+                              ? widget.post.description!
+                              : "lol"),
+                        ],
+                      ),
                       new Padding(padding: new EdgeInsets.all(10)),
                       new Row(
                         children: [
@@ -441,18 +454,12 @@ class _PostWidState extends State<PostWid> {
                           FutureBuilder(
                               future: _getUserDetail(),
                               builder: (context, snapshot) {
-                                if (imgdownload != "null" &&
-                                    imgdownload != null) {
+                                if (snapshot.connectionState ==
+                                    ConnectionState.done) {
                                   return Row(
                                     children: [
-                                      new Text(
-                                        widget.ud.username,
-                                        style: new TextStyle(
-                                            fontSize: 15,
-                                            color: Colors.black,
-                                            fontWeight: FontWeight.bold),
-                                      ),
-                                      widget.ud.level == "artisan"
+                                      Text(ser!.username),
+                                      "fd" == "artisan"
                                           ? new Icon(
                                               Icons.verified,
                                               color: Color.fromARGB(
@@ -461,47 +468,19 @@ class _PostWidState extends State<PostWid> {
                                           : new Icon(
                                               Icons.verified,
                                               color: Color.fromARGB(
-                                                  255, 190, 182, 65),
+                                                  255, 56, 55, 37),
                                             ),
                                     ],
                                   );
-                                } else {
-                                  return new Container(
-                                    margin: new EdgeInsets.all(10),
-                                    decoration: BoxDecoration(
-                                      color: Colors.yellow,
-                                      borderRadius: BorderRadius.circular(30),
-                                      boxShadow: [
-                                        BoxShadow(
-                                            color: Color.fromARGB(50, 0, 0, 0),
-                                            spreadRadius: 5,
-                                            blurRadius: 7)
-                                      ],
-                                    ),
-                                    child: new Row(
-                                      mainAxisAlignment: MainAxisAlignment.end,
-                                      children: [
-                                        Container(
-                                            margin: new EdgeInsets.all(10),
-                                            decoration: BoxDecoration(
-                                                shape: BoxShape.circle,
-                                                boxShadow: [
-                                                  BoxShadow(
-                                                    color: Color.fromARGB(
-                                                        100, 0, 0, 0),
-                                                    blurRadius: 5.0,
-                                                  ),
-                                                ]),
-                                            child: Icon(
-                                              Icons.info_outline_rounded,
-                                              color: Color.fromARGB(
-                                                  255, 255, 255, 255),
-                                              size: 25,
-                                            ))
-                                      ],
-                                    ),
-                                  );
                                 }
+                                if (snapshot.hasError) {
+                                  return Text("error");
+                                }
+
+                                return SizedBox(
+                                    width: 10,
+                                    height: 10,
+                                    child: CircularProgressIndicator());
                               }),
                           new Row(
                             children: [

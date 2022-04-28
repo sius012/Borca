@@ -107,7 +107,9 @@ class AuthService {
     }
   }
 
-  logoutUser() async {}
+  logoutUser() async {
+    await FirebaseAuth.instance.signOut();
+  }
 }
 
 class Users {

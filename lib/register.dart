@@ -78,6 +78,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                 borderRadius: BorderRadius.circular(20))),
                       ),
                     ),
+                    new Padding(padding: new EdgeInsets.all(5)),
                     new Padding(
                       padding: new EdgeInsets.symmetric(horizontal: 50),
                       child: new TextField(
@@ -137,7 +138,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                                 password: password.text,
                                                 namalengkap: namaL.text);
 
-                                        if (user != null) {
+                                        if (user[0] != null) {
                                           Navigator.of(context)
                                               .pushAndRemoveUntil(
                                                   MaterialPageRoute(

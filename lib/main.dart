@@ -14,10 +14,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
-    statusBarColor: Color.fromARGB(0, 0, 255, 255),
-    statusBarBrightness: Brightness.dark,
-  ));
+
   runApp(const MyApp());
 }
 

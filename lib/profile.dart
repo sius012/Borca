@@ -1,4 +1,5 @@
 import 'package:borca2/add_post.dart';
+import 'package:borca2/layout/layout.dart';
 import 'package:borca2/register.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -74,45 +75,7 @@ class _ProfileState extends State<Profile> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        bottomNavigationBar: Container(
-            decoration: BoxDecoration(
-              color: Color.fromARGB(0, 0, 0, 0),
-              borderRadius: BorderRadius.only(
-                  topRight: Radius.circular(30), topLeft: Radius.circular(30)),
-              boxShadow: [
-                BoxShadow(
-                    color: Colors.black38, spreadRadius: 0, blurRadius: 10),
-              ],
-            ),
-            child: ClipRRect(
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(30.0),
-                  topRight: Radius.circular(30.0),
-                ),
-                child: new Padding(
-                  padding: new EdgeInsets.all(0),
-                  child: BottomNavigationBar(items: [
-                    BottomNavigationBarItem(
-                        icon: Icon(
-                          Icons.home,
-                        ),
-                        label: ""),
-                    BottomNavigationBarItem(
-                        icon: new GestureDetector(
-                          child: new SvgPicture.asset(
-                            "assets/icons/add_post.svg",
-                            height: 30,
-                          ),
-                          onTap: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => const AddPostPage()),
-                          ),
-                        ),
-                        label: ""),
-                    BottomNavigationBarItem(icon: Icon(Icons.home), label: "")
-                  ]),
-                ))),
+        bottomNavigationBar: MyNavbar(),
         body: FutureBuilder(
           future: _fetch(),
           builder: (context, snapshot) {
