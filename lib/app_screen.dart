@@ -36,20 +36,43 @@ class _AppScreenState extends State<AppScreen> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    var check = FirebaseAuth.instance.authStateChanges().listen((event) async {
-      if (event != null) {
+    var check2 = FirebaseAuth.instance.currentUser;
+    var check = FirebaseAuth.instance.authStateChanges().listen((event) {
+      if (check2 != null) {
         print("antum wes login");
 
         setState(() {
-          u = event;
+          u = check2;
         });
         print(u!.uid);
       } else {
-        print("anda durung login");
-        await Navigator.push(
+        print("anda durudng login");
+        Navigator.push(
             context, MaterialPageRoute(builder: (context) => LoginPage()));
       }
     });
+  }
+
+  Future<List<dynamic>> _getUserDetail() async {
+    final fireuser = await FirebaseAuth.instance.currentUser;
+    User umas;
+    if (fireuser != null) {
+      var response = await FirebaseFirestore.instance
+          .collection("users_detail")
+          .doc(fireuser.uid)
+          .get()
+          .then((value) {
+        ud = Users.fromJson(value.data() as dynamic);
+        u = fireuser;
+
+        print("ikan");
+      }).catchError((e) {
+        print("d");
+        print("the error is : " + e.toString());
+      });
+      umas = fireuser;
+    } else {}
+    return [u, ud];
   }
 
   Future _fetch() async {
@@ -68,10 +91,7 @@ class _AppScreenState extends State<AppScreen> {
         print("d");
         print("the error is : " + e.toString());
       });
-    } else {
-      var data = Navigator.push(
-          context, MaterialPageRoute(builder: (context) => new LoginPage()));
-    }
+    } else {}
     return "lol";
   }
 
@@ -183,28 +203,42 @@ class _AppScreenState extends State<AppScreen> {
           ),
         ),
         backgroundColor: Color.fromARGB(255, 255, 255, 255),
-        body: StreamBuilder(
-            stream: FirebaseFirestore.instance
-                .collection('post_collection')
-                .snapshots(),
-            builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
-              if (snapshot.hasError) {
-                return Text(snapshot.error.toString());
-              } else if (snapshot.hasData) {
-                return ListView(
-                    children: snapshot.data!.docs.map((e) {
-                  PostModel postModel = PostModel.fromJson(e.data() as dynamic);
-                  return FutureBuilder(
-                      future: _fetch(),
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState == ConnectionState.done) {
-                          return PostWid(post: postModel);
+        body: FutureBuilder(
+            future: _getUserDetail(),
+            builder: (context, snapshotku) {
+              if (snapshotku.connectionState == ConnectionState.done) {
+                List<dynamic> listku = snapshotku.data as List;
+                if (listku[0] != null) {
+                  return StreamBuilder(
+                      stream: FirebaseFirestore.instance
+                          .collection('post_collection')
+                          .orderBy("date", descending: true)
+                          .snapshots(),
+                      builder:
+                          (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+                        if (snapshot.hasError) {
+                          return Text(snapshot.error.toString());
+                        } else if (snapshot.hasData) {
+                          return ListView(
+                              children: snapshot.data!.docs.map((e) {
+                            PostModel postModel =
+                                PostModel.fromJson(e.data() as dynamic);
+
+                            return PostWid(
+                                post: postModel,
+                                id_user: (listku[0] as User).uid);
+                          }).toList());
                         }
-                        return Center(child: CircularProgressIndicator());
+                        return Text("fd");
                       });
-                }).toList());
+                }
+
+                return CircularProgressIndicator();
               }
-              return Text("fd");
+
+              return Center(
+                child: new CircularProgressIndicator(),
+              );
             }),
         bottomNavigationBar: MyNavbar());
   }

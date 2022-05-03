@@ -121,6 +121,8 @@ class _LoginPageState extends State<LoginPage> {
                                                       builder: (contex) =>
                                                           AppScreen()),
                                                   (route) => false);
+                                        } else {
+                                          print("data kosong ");
                                         }
                                       },
                                       child: new Text(

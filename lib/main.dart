@@ -1,5 +1,6 @@
 import 'package:borca2/auth.dart';
 import 'package:borca2/auth_service.dart';
+import 'package:borca2/chat.dart';
 import 'package:borca2/firebase_options.dart';
 import 'package:borca2/register.dart';
 import 'package:flutter/material.dart';
@@ -34,7 +35,7 @@ class MyApp extends StatelessWidget {
       ],
       builder: (context, child) => MaterialApp(
         debugShowCheckedModeBanner: false,
-        home: AppScreen(),
+        home: new AppScreen(),
       ),
     );
   }

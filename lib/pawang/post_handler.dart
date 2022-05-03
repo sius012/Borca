@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:borca2/login.dart';
+import 'package:borca2/object/bidtile.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -8,6 +9,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import '../object/postingan.dart';
 import '../object/like.dart';
 import '../auth_service.dart';
+import 'package:borca2/object/komentar.dart';
 
 class PostHandler {
   FirebaseAuth auth = FirebaseAuth.instance;
@@ -37,7 +39,7 @@ class PostHandler {
       return true;
     } else {
       print("dgs");
-      var liko = await FirebaseFirestore.instance
+      var liko = FirebaseFirestore.instance
           .collection("like")
           .where("id_liker", isEqualTo: uid)
           .where("id_post", isEqualTo: liked.id_post)
@@ -50,12 +52,27 @@ class PostHandler {
     }
   }
 
+  komen(Komentar komentar) async {
+    var komendoc = postLib.collection("post_comment").doc();
+
+    Komentar comment = Komentar(
+        id: komendoc.id,
+        isi: komentar.isi,
+        tanggal: komentar.tanggal,
+        id_user: komentar.id_user,
+        id_post: komentar.id_post);
+
+    final komenjson = comment.toJson();
+
+    await komendoc.set(komenjson);
+  }
+
   postingbos(PostModel post, File image) async {
     var modelPost = post;
     var docUser = postLib.collection('post_collection').doc();
 
     PostModel pm = PostModel(
-        date: DateTime.now(),
+        date: Timestamp.now(),
         id_user: post.id_user,
         picname: "postingannya-" + docUser.id,
         title: post.title,
@@ -88,5 +105,12 @@ class PostHandler {
       print('file not found');
       return "[kosong]";
     }
+  }
+
+  addBid(BidModel bid) async {
+    print("masuk");
+    var ref = await FirebaseFirestore.instance.collection("auction").doc();
+
+    await ref.set(bid.toJson());
   }
 }

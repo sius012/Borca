@@ -88,6 +88,7 @@ class AuthService {
     } catch (e) {
       print(e.toString());
     }
+    return [user, getUser];
   }
 
   getuserdetail(String uid) async {
@@ -135,6 +136,7 @@ class Users {
       };
 
   static Users fromJson(Map<String, dynamic> json) => Users(
+      id: "none",
       username: json['username'],
       level: json['level'],
       id_user: json['id_user'],

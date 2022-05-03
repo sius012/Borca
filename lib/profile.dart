@@ -1,5 +1,7 @@
 import 'package:borca2/add_post.dart';
 import 'package:borca2/layout/layout.dart';
+import 'package:borca2/object/postingan.dart';
+import 'package:borca2/pawang/post_handler.dart';
 import 'package:borca2/register.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -21,6 +23,9 @@ class _ProfileState extends State<Profile> {
   User? user1;
   Users? duser;
 
+  List<String>? photo;
+  PostHandler ph = new PostHandler();
+
   @override
   void initState() {
     // TODO: implement initState
@@ -39,6 +44,11 @@ class _ProfileState extends State<Profile> {
       print("fdf");
       user1 = widget.user;
     }
+  }
+
+  Future<String> getImg(String idg, String pid) async {
+    String d = await ph.getImageDownload(idg, pid);
+    return d;
   }
 
   Future _fetch() async {
@@ -256,7 +266,7 @@ class _ProfileState extends State<Profile> {
                                               fontWeight: FontWeight.bold),
                                         ),
                                         new Text(
-                                          "Ngendogers",
+                                          "Pengikut",
                                           style: TextStyle(fontSize: 12),
                                         ),
                                       ],
@@ -353,21 +363,61 @@ class _ProfileState extends State<Profile> {
                         )
                       ]),
                     ),
-                    GridView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 3,
-                              childAspectRatio: 1 / 1,
-                              crossAxisSpacing: 1,
-                              mainAxisSpacing: 1),
-                      itemBuilder: (context, index) => Container(
-                        color: Color.lerp(Color.fromARGB(0, 24, 55, 60),
-                            Color.fromARGB(255, 24, 55, 60), 0.1),
-                      ),
-                      itemCount: 50,
-                    ),
+                    StreamBuilder(
+                      stream: FirebaseFirestore.instance
+                          .collection("post_collection")
+                          .snapshots(),
+                      builder: (BuildContext context,
+                          AsyncSnapshot<QuerySnapshot> snapshot) {
+                        if (snapshot.hasData) {
+                          List<PostModel> pm =
+                              snapshot.data!.docs.map((document) {
+                            return PostModel.fromJson(
+                                document.data() as dynamic);
+                          }).toList();
+                          return GridView.builder(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            gridDelegate:
+                                const SliverGridDelegateWithFixedCrossAxisCount(
+                                    crossAxisCount: 3,
+                                    childAspectRatio: 1 / 1,
+                                    crossAxisSpacing: 1,
+                                    mainAxisSpacing: 1),
+                            itemBuilder: (context, int index) {
+                              return FutureBuilder<String>(
+                                  future:
+                                      getImg(pm[index].picname, pm[index].id!),
+                                  builder: (context, snapshot) {
+                                    if (snapshot.hasData) {
+                                      return Container(
+                                        decoration: BoxDecoration(
+                                          image: DecorationImage(
+                                              image: NetworkImage(
+                                                  snapshot.data as dynamic),
+                                              fit: BoxFit.cover),
+                                          color: Color.lerp(
+                                              Color.fromARGB(0, 24, 55, 60),
+                                              Color.fromARGB(255, 24, 55, 60),
+                                              0.1),
+                                        ),
+                                      );
+                                    }
+                                    return Container(
+                                      color: Color.lerp(
+                                          Color.fromARGB(0, 24, 55, 60),
+                                          Color.fromARGB(255, 24, 55, 60),
+                                          0.1),
+                                    );
+                                  });
+                            },
+                            itemCount: pm.length,
+                          );
+                        } else {
+                          return CircularProgressIndicator();
+                        }
+                      },
+                    )
                   ]),
                 ],
               );

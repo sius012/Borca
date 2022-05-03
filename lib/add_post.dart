@@ -16,7 +16,6 @@ import '../object/postingan.dart';
 import '../pawang/post_handler.dart';
 import 'auth_service.dart';
 
-
 class AddPostPage extends StatefulWidget {
   const AddPostPage({Key? key}) : super(key: key);
   @override
@@ -51,8 +50,6 @@ class _AddPostPageState extends State<AddPostPage> {
   Future postingBos(PostModel post, File image) async {
     await post1.postingbos(post, image);
   }
-
-
 
   @override
   void initState() {
@@ -323,6 +320,7 @@ class _AddPostPageState extends State<AddPostPage> {
                           border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(10)))),
                   RaisedButton(
+                    color: Colors.blue,
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10)),
                     textColor: Colors.white,

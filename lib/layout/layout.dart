@@ -1,3 +1,6 @@
+import 'package:borca2/app_screen.dart';
+import 'package:borca2/chat.dart';
+import 'package:borca2/notif.dart';
 import 'package:flutter/material.dart';
 import 'package:borca2/add_post.dart';
 import 'package:borca2/profile.dart';
@@ -30,17 +33,26 @@ class _MyNavbarState extends State<MyNavbar> {
 
             //favorite
             BottomNavigationBarItem(
-              icon: Icon(
-                Icons.home,
-              ),
-              activeIcon: Icon(
-                Icons.home,
+              icon: GestureDetector(
+                child: Icon(Icons.home),
+                onTap: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (contex) {
+                    return AppScreen();
+                  }));
+                },
               ),
               label: '',
             ),
             //loockback
             BottomNavigationBarItem(
-              icon: Icon(Icons.list),
+              icon: GestureDetector(
+                child: Icon(Icons.chat),
+                onTap: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (contex) {
+                    return Chat();
+                  }));
+                },
+              ),
               activeIcon: Icon(Icons.bar_chart),
               label: '',
             ),
@@ -55,12 +67,18 @@ class _MyNavbarState extends State<MyNavbar> {
                   MaterialPageRoute(builder: (context) => const AddPostPage()),
                 ),
               ),
-              activeIcon: Icon(Icons.bar_chart),
+              activeIcon: Icon(Icons.notifications),
               label: '',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.bar_chart),
-              activeIcon: Icon(Icons.bar_chart),
+              icon: GestureDetector(
+                child: Icon(Icons.notifications),
+                onTap: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (contex) {
+                    return new Notif();
+                  }));
+                },
+              ),
               label: '',
             ),
 
