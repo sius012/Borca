@@ -1,15 +1,32 @@
 import 'package:borca2/login.dart';
+import 'package:borca2/object/chatModel.dart';
 import 'package:borca2/object/postingan.dart';
+import 'package:borca2/pawang/chathandler.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'auth_service.dart';
 import 'package:intl/intl.dart';
 
 class Chatdetail extends StatefulWidget {
+  final Users ud;
+  final String uid;
+  const Chatdetail({Key? key, required this.ud, required this.uid})
+      : super(key: key);
   @override
   _ChatdetailState createState() => new _ChatdetailState();
 }
 
 class _ChatdetailState extends State<Chatdetail> {
+  late TextEditingController komen;
+  ChatHandler chand = ChatHandler();
+
+  @override
+  void initState() {
+    super.initState();
+
+    komen = new TextEditingController();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -22,7 +39,7 @@ class _ChatdetailState extends State<Chatdetail> {
         ),
         backgroundColor: Colors.white,
         title: new Text(
-          "Surya Mahadita",
+          widget.ud.namaL,
           style:
               TextStyle(color: Color.fromARGB(255, 80, 80, 80), fontSize: 13),
         ),
@@ -33,49 +50,72 @@ class _ChatdetailState extends State<Chatdetail> {
           height: MediaQuery.of(context).size.height,
           child: new Stack(
             children: [
-              new ListView(
-                children: [
-                  ChatBubble(
-                    text: "Halfffffffffffffffffffffffffffffffffffff",
-                    tgl: DateTime.now(),
-                    idc: "fdfdfsdg",
-                    idku: "fsfasfasfas",
-                    hasRead: false,
-                  ),
-                  ChatBubble(
-                    text:
-                        "Halfffffffffffffffffffffffffffffffffffffffddddffffffffffffffffffofdsfsdfsdffffffffffffffffffffffffffffffffffffffffffffffffff",
-                    tgl: DateTime.now(),
-                    idc: "fsfasfasfas",
-                    idku: "fsfasfasfas",
-                    hasRead: true,
-                  ),
-                ],
-              ),
-              Align(
+              new StreamBuilder(
+                  stream: FirebaseFirestore.instance.collection("chat").where(
+                      "id_user",
+                      whereIn: [widget.uid, widget.ud.id_user]).snapshots(),
+                  builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+                    if (snapshot.hasData) {
+                      return ListView(
+                        children: snapshot.data!.docs.map((e) {
+                          ChatModel docs = ChatModel.fromJson(
+                              e.data() as Map<String, dynamic>);
+                          return (e.data() as Map)["to"] == widget.uid ||
+                                  (e.data() as Map)["to"] == widget.ud.id_user
+                              ? ChatBubble(
+                                  uid: widget.uid,
+                                  text: docs.message,
+                                  tgl: docs.timestamp!.toDate(),
+                                  idku: docs.id_user,
+                                  idc: docs.to,
+                                  hasRead: docs.hasRead)
+                              : Container();
+                        }).toList(),
+                      );
+                    }
+                    return CircularProgressIndicator();
+                  }),
+              new Align(
                 alignment: Alignment.bottomCenter,
                 child: new Container(
-                    decoration: BoxDecoration(boxShadow: [
-                      BoxShadow(blurRadius: 10, spreadRadius: -5)
-                    ], color: Colors.white),
-                    padding: EdgeInsets.all(10),
-                    child: new Row(
-                      children: [
-                        new Container(
-                          width: MediaQuery.of(context).size.width - 80,
-                          child: TextFormField(
-                            decoration:
-                                InputDecoration(hintText: "Masukan Pesan"),
-                          ),
+                  decoration: BoxDecoration(boxShadow: [
+                    BoxShadow(
+                        blurRadius: 20, color: Color.fromARGB(100, 0, 0, 0))
+                  ], color: Colors.white),
+                  padding: EdgeInsets.all(10),
+                  child: new Row(
+                    children: [
+                      new Container(
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(
+                                width: 2,
+                                color: Color.fromARGB(255, 105, 115, 229))),
+                        width: MediaQuery.of(context).size.width - 80,
+                        child: new TextField(
+                          controller: komen,
                         ),
-                        new IconButton(
-                            onPressed: () {},
-                            icon: Icon(
-                              Icons.send,
-                              color: Colors.black,
-                            ))
-                      ],
-                    )),
+                      ),
+                      new IconButton(
+                          onPressed: () async {
+                            if (komen.text != null && !komen.text.isEmpty) {
+                              ChatModel cm = ChatModel(
+                                  hasRead: false,
+                                  message: komen.text,
+                                  id_user: widget.uid,
+                                  to: widget.ud.id_user,
+                                  timestamp: Timestamp.now());
+
+                              await chand.sendChat(cm);
+                              setState(() {
+                                komen.text = "";
+                              });
+                            }
+                          },
+                          icon: Icon(Icons.send))
+                    ],
+                  ),
+                ),
               )
             ],
           )),
@@ -84,6 +124,7 @@ class _ChatdetailState extends State<Chatdetail> {
 }
 
 class ChatBubble extends StatefulWidget {
+  final String uid;
   final String text;
   final DateTime tgl;
   final String idku;
@@ -95,7 +136,8 @@ class ChatBubble extends StatefulWidget {
       required this.tgl,
       required this.idku,
       required this.idc,
-      required this.hasRead})
+      required this.hasRead,
+      required this.uid})
       : super(key: key);
 
   @override
@@ -119,7 +161,7 @@ class _ChatBubbleState extends State<ChatBubble> {
   @override
   Widget build(BuildContext context) {
     return Row(
-      mainAxisAlignment: widget.idku == widget.idc
+      mainAxisAlignment: widget.uid == widget.idku
           ? MainAxisAlignment.end
           : MainAxisAlignment.start,
       children: [
@@ -146,7 +188,7 @@ class _ChatBubbleState extends State<ChatBubble> {
                             BoxConstraints(minWidth: 100, maxWidth: 200),
                         padding: EdgeInsets.all(10),
                         decoration: BoxDecoration(
-                            color: widget.idc == widget.idku
+                            color: widget.uid == widget.idku
                                 ? Colors.blue
                                 : Colors.white,
                             borderRadius: BorderRadius.only(
@@ -163,7 +205,7 @@ class _ChatBubbleState extends State<ChatBubble> {
                             new Text(
                               widget.text,
                               style: TextStyle(
-                                  color: widget.idc == widget.idku
+                                  color: widget.uid == widget.idku
                                       ? Color.fromARGB(255, 255, 255, 255)
                                       : Color.fromARGB(255, 0, 0, 0)),
                             ),
@@ -174,12 +216,12 @@ class _ChatBubbleState extends State<ChatBubble> {
                                   DateFormat("hh:mm a").format(widget.tgl),
                                   style: TextStyle(
                                       fontSize: 12,
-                                      color: widget.idc == widget.idku
+                                      color: widget.uid == widget.idku
                                           ? Color.fromARGB(255, 255, 255, 255)
                                           : Color.fromARGB(255, 105, 105, 105)),
                                 ),
                                 new Spacer(),
-                                widget.idc == widget.idku
+                                widget.uid == widget.idku
                                     ? widget.hasRead
                                         ? Icon(Icons.check_rounded,
                                             color: Colors.white)
@@ -193,7 +235,7 @@ class _ChatBubbleState extends State<ChatBubble> {
                           ],
                         )),
                   )),
-              widget.idc != widget.idku
+              widget.uid != widget.idku
                   ? new Positioned(
                       child: new Container(
                           child: new CircleAvatar(

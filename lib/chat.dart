@@ -3,8 +3,11 @@ import 'package:borca2/login.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'auth_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class Chat extends StatefulWidget {
+  final User userdata;
+  const Chat({Key? key, required this.userdata}) : super(key: key);
   @override
   _ChatState createState() => new _ChatState();
 }
@@ -31,9 +34,23 @@ class _ChatState extends State<Chat> {
         ],
       ),
       body: new Container(
-        padding: EdgeInsets.all(2),
-        child: StreamBuilder(stream: FirebaseFirestore.instance.collection("users_detail").snapshots(),builder: (context, AsyncSnapshot<Qu),)
-      ),
+          padding: EdgeInsets.all(2),
+          child: StreamBuilder(
+            stream: FirebaseFirestore.instance
+                .collection("users_detail")
+                .snapshots(),
+            builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+              if (snapshot.hasData) {
+                return ListView(
+                  children: snapshot.data!.docs.map((e) {
+                    return ChatUserTile(
+                        id_user: widget.userdata.uid, id_target: e.id);
+                  }).toList(),
+                );
+              }
+              return CircularProgressIndicator();
+            },
+          )),
     );
   }
 }
@@ -50,13 +67,40 @@ class ChatUserTile extends StatefulWidget {
 }
 
 class _ChatUserState extends State<ChatUserTile> {
+  FirebaseFirestore instance = FirebaseFirestore.instance;
+
+  Users? ud;
+  Users? udetail;
+  String? lastchat;
+  bool? lastme;
+
+  _getlastchat() async {
+    var dato = await instance
+        .collection("chat")
+        .where("id_user", whereIn: [widget.id_target, widget.id_user])
+        .snapshots()
+        .map((event) => event.docs.map((e) {
+              if (e.data()["to"] == widget.id_target ||
+                  e.data()["to"] == widget.id_user) {
+                return e.data()["message"];
+              }
+            }))
+        .toList();
+
+    print("fdsfwf${dato}");
+
+    lastchat = dato != null ? dato.last.toString() : "";
+  }
+
   Future _getUserdetail() async {
     Map? ud;
+
     await FirebaseFirestore.instance
         .collection("users_detail")
         .doc(widget.id_target)
         .get()
         .then((value) => ud = value.data() as Map);
+
     if (ud != null) {
       return ud!;
     }
@@ -64,11 +108,33 @@ class _ChatUserState extends State<ChatUserTile> {
   }
 
   @override
+  void initState() {
+    super.initState();
+
+    //getusername, etc
+    FirebaseFirestore.instance
+        .collection("users_detail")
+        .doc(widget.id_target)
+        .get()
+        .then((value) {
+      print("datanya ada");
+      setState(() {
+        udetail = udetail = Users.fromJson(value.data()!);
+      });
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () {
         Navigator.push(
-            context, MaterialPageRoute(builder: (context) => new Chatdetail()));
+            context,
+            MaterialPageRoute(
+                builder: (context) => new Chatdetail(
+                      ud: udetail!,
+                      uid: widget.id_user,
+                    )));
       },
       child: new Card(
         elevation: 1,
@@ -88,24 +154,20 @@ class _ChatUserState extends State<ChatUserTile> {
                 new Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    new Text(
+                      udetail != null ? udetail!.username : "tiddak ada",
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
                     FutureBuilder(
-                        future: _getUserdetail(),
+                        future: _getlastchat(),
                         builder: (context, snapshot) {
                           if (snapshot.connectionState ==
                               ConnectionState.done) {
-                            if (snapshot.data != null) {
-                              new Text(
-                                (snapshot.data as Map)["username"],
-                                style: TextStyle(fontWeight: FontWeight.bold),
-                              );
-                            } else {
-                              return Text("data kosong");
-                            }
+                            return new Text(lastchat!);
                           }
 
-                          return CircularProgressIndicator();
-                        }),
-                    new Text("halo samadng...")
+                          return new Text("");
+                        })
                   ],
                 ),
                 new Spacer(),

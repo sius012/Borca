@@ -1,4 +1,5 @@
 import 'package:borca2/object/bidtile.dart';
+import 'package:borca2/profile.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -662,10 +663,20 @@ class _PostWidState extends State<PostWid> {
                 padding: EdgeInsets.symmetric(horizontal: 10, vertical: 15),
                 child: new Row(
                   children: [
-                    new CircleAvatar(
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(50.0),
+                    InkWell(
+                      child: new CircleAvatar(
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(50.0),
+                        ),
                       ),
+                      onTap: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => Profile(
+                                      user: widget.post.id_user,
+                                    )));
+                      },
                     ),
                     new Padding(padding: EdgeInsets.symmetric(horizontal: 4)),
                     new Container(

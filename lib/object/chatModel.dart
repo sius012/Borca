@@ -22,8 +22,8 @@ class ChatModel {
 
   Map<String, dynamic> toJson() => {
         "message": message,
-        "id_user": message,
-        "to": message,
+        "id_user": id_user,
+        "to": to,
         "hasRead": hasRead,
         "timestamp": timestamp
       };

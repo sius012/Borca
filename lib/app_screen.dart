@@ -240,6 +240,10 @@ class _AppScreenState extends State<AppScreen> {
                 child: new CircularProgressIndicator(),
               );
             }),
-        bottomNavigationBar: MyNavbar());
+        bottomNavigationBar: u != null
+            ? MyNavbar(
+                userdata: u!,
+              )
+            : Container());
   }
 }

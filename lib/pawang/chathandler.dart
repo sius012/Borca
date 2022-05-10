@@ -22,8 +22,12 @@ class ChatHandler {
     FirebaseFirestore.instance.collection("chat").doc().set(chat.toJson());
   }
 
-  readChat(String id_target, String uid) {
-    FirebaseFirestore.instance.collection("chat").where("id_user",
-        whereIn: [uid, id_target]).where("to", whereIn: [uid, id_target]).orderBy("timestamp", descending: false).snapshots();
+  Stream readChat(String id_target, String uid) async* {
+    var dato = await FirebaseFirestore.instance
+        .collection("chat")
+        .where("id_user", whereIn: [uid, id_target])
+        .orderBy("timestamp", descending: false)
+        .snapshots();
+    yield dato;
   }
 }
